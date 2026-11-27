@@ -11,8 +11,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
+  <!-- Leaflet.js Interactive Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  
   <!-- External & Inline Stylesheet -->
-  <link rel="stylesheet" href="/static/style.css?v=4.0">
+  <link rel="stylesheet" href="/static/style.css?v=5.0">
   <style>
     /* Critical Inline Guard to guarantee 100% styled page under all conditions */
     :root {
@@ -68,7 +71,7 @@
         </div>
         <div class="brand-text-col">
           <span class="brand-title">WanderLuxe <span class="brand-accent">AI</span></span>
-          <span class="brand-subtitle">Autonomous Travel Curator</span>
+          <span class="brand-subtitle">Autonomous Multi-Agent Travel Curator</span>
         </div>
       </a>
 
@@ -83,7 +86,7 @@
       <div class="nav-right-actions">
         <div class="system-status-pill">
           <span class="pulse-indicator"></span>
-          <span>5 Agents Online</span>
+          <span>5 Agents Online • Leaflet Maps</span>
         </div>
         <a href="#plannerSection" class="btn-nav-cta">
           <i class="fa-solid fa-compass"></i>
@@ -95,12 +98,12 @@
 
   <!-- ==========================================================================
        Hero Section: Immersive Nature Visual Backdrop
-       ========================================================================== */ -->
+       ========================================================================== -->
   <section id="hero" class="hero-nature-wrapper">
     <div class="hero-content">
       <div class="hero-badge-pill">
         <i class="fa-solid fa-leaf"></i>
-        <span>Autonomous Multi-Agent Travel Intelligence • LangGraph & MCP</span>
+        <span>Autonomous Travel Swarm • LangGraph + FastMCP + Leaflet Interactive Routes</span>
       </div>
 
       <h1 class="hero-title">
@@ -109,22 +112,22 @@
 
       <p class="hero-description">
         Experience seamless travel curation powered by an autonomous swarm of 5 AI specialists. 
-        Real-time flight routes, live boutique stays, microclimate forecasts, and feasibility analysis — 
-        orchestrated into a bespoke itinerary with your final human stamp of approval.
+        Real-time flight & bus routes, live boutique stays, microclimate forecasts, and connected route maps — 
+        tailored to your exact mood and verified by Human-in-the-Loop review.
       </p>
 
       <div class="hero-highlights-strip">
         <div class="highlight-pill">
           <i class="fa-solid fa-plane-departure"></i>
-          <span>Live Aviation Routing</span>
+          <span>Multi-Modal Flights & Buses</span>
         </div>
         <div class="highlight-pill">
-          <i class="fa-solid fa-hotel"></i>
-          <span>Real-Time Tavily Stays</span>
+          <i class="fa-solid fa-map-location-dot"></i>
+          <span>Connected Route Maps</span>
         </div>
         <div class="highlight-pill">
-          <i class="fa-solid fa-cloud-sun-rain"></i>
-          <span>FastMCP Climate Data</span>
+          <i class="fa-solid fa-masks-theater"></i>
+          <span>Traveler Mood Discovery</span>
         </div>
         <div class="highlight-pill">
           <i class="fa-solid fa-shield-halved"></i>
@@ -160,7 +163,7 @@
             </div>
             <div>
               <h2>AI Journey Architect</h2>
-              <p>Describe your dream vacation in plain English, or configure custom trip parameters.</p>
+              <p>Discover your mood, describe your vision in plain English, and watch the agents build your connected itinerary.</p>
             </div>
           </div>
 
@@ -174,11 +177,79 @@
           </div>
         </div>
 
+        <!-- ==========================================================================
+             Feature: Traveler Mood & Persona Analyzer
+             ========================================================================== -->
+        <div class="mood-analyzer-section">
+          <div class="mood-header-row">
+            <div class="mood-title-badge">
+              <i class="fa-solid fa-masks-theater"></i>
+              <span>Step 1: Select Your Travel Mood & Persona</span>
+            </div>
+            <span class="mood-subtext">Agents tailor temple darshans, mountain routes, stays & pacing to your mood</span>
+          </div>
+
+          <div class="mood-grid">
+            <div class="mood-card active" data-mood="spiritual" onclick="selectMood('spiritual')">
+              <i class="fa-solid fa-circle-check mood-badge-check"></i>
+              <div class="mood-icon-box"><i class="fa-solid fa-om" style="color:#d97706;"></i></div>
+              <span class="mood-name">Spiritual & Temples</span>
+            </div>
+            <div class="mood-card" data-mood="mountain" onclick="selectMood('mountain')">
+              <i class="fa-solid fa-circle-check mood-badge-check"></i>
+              <div class="mood-icon-box"><i class="fa-solid fa-mountain-sun" style="color:#0284c7;"></i></div>
+              <span class="mood-name">Mountains & Serenity</span>
+            </div>
+            <div class="mood-card" data-mood="beach" onclick="selectMood('beach')">
+              <i class="fa-solid fa-circle-check mood-badge-check"></i>
+              <div class="mood-icon-box"><i class="fa-solid fa-umbrella-beach" style="color:#059669;"></i></div>
+              <span class="mood-name">Beaches & Islands</span>
+            </div>
+            <div class="mood-card" data-mood="heritage" onclick="selectMood('heritage')">
+              <i class="fa-solid fa-circle-check mood-badge-check"></i>
+              <div class="mood-icon-box"><i class="fa-solid fa-landmark" style="color:#7c3aed;"></i></div>
+              <span class="mood-name">Heritage & Forts</span>
+            </div>
+            <div class="mood-card" data-mood="adventure" onclick="selectMood('adventure')">
+              <i class="fa-solid fa-circle-check mood-badge-check"></i>
+              <div class="mood-icon-box"><i class="fa-solid fa-person-hiking" style="color:#ea580c;"></i></div>
+              <span class="mood-name">Thrill & Safari</span>
+            </div>
+            <div class="mood-card" data-mood="wellness" onclick="selectMood('wellness')">
+              <i class="fa-solid fa-circle-check mood-badge-check"></i>
+              <div class="mood-icon-box"><i class="fa-solid fa-spa" style="color:#db2777;"></i></div>
+              <span class="mood-name">Wellness & Spas</span>
+            </div>
+          </div>
+
+          <div class="mood-preferences-strip">
+            <div class="pref-group">
+              <span class="pref-group-label">Companion:</span>
+              <span class="pref-tag-chip active" data-pref="companion" data-val="family" onclick="selectPref('companion', 'family', this)">Family & Elders</span>
+              <span class="pref-tag-chip" data-pref="companion" data-val="solo" onclick="selectPref('companion', 'solo', this)">Solo Explorer</span>
+              <span class="pref-tag-chip" data-pref="companion" data-val="couple" onclick="selectPref('companion', 'couple', this)">Couple</span>
+              <span class="pref-tag-chip" data-pref="companion" data-val="friends" onclick="selectPref('companion', 'friends', this)">Friends Group</span>
+            </div>
+            <div class="pref-group">
+              <span class="pref-group-label">Pace:</span>
+              <span class="pref-tag-chip active" data-pref="pace" data-val="balanced" onclick="selectPref('pace', 'balanced', this)">Balanced</span>
+              <span class="pref-tag-chip" data-pref="pace" data-val="relaxed" onclick="selectPref('pace', 'relaxed', this)">Relaxed (No Rush)</span>
+              <span class="pref-tag-chip" data-pref="pace" data-val="packed" onclick="selectPref('pace', 'packed', this)">Fast Highlights</span>
+            </div>
+            <div class="pref-group">
+              <span class="pref-group-label">Preferred Transit:</span>
+              <span class="pref-tag-chip active" data-pref="transit" data-val="all" onclick="selectPref('transit', 'all', this)">Any (Flight/Bus/Train)</span>
+              <span class="pref-tag-chip" data-pref="transit" data-val="flight" onclick="selectPref('transit', 'flight', this)">Flight Preferred</span>
+              <span class="pref-tag-chip" data-pref="transit" data-val="bus_car" onclick="selectPref('transit', 'bus_car', this)">AC Sleeper Bus / Cab</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Mode A: Freeform Prompt -->
         <div id="freeformArea" class="prompt-input-container">
           <textarea 
             id="userInput" 
-            placeholder="e.g. Plan a complete 7-day scenic and cultural trip to Japan from Bangladesh under 2 lakhs including flight guidance, boutique hotels, bullet train travel, and must-see attractions..."
+            placeholder="e.g. I am in Hyderabad and want to plan a 7-day tour across Andhra Pradesh visiting famous temples like Tirupati, Srisailam, Kanipakam, and Vijayawada. Include flight/train/bus travel, temple hotels, morning darshan timings, budget under 40,000 INR, and a connected route map..."
           ></textarea>
 
           <div class="prompt-actions-footer">
@@ -197,35 +268,35 @@
           <div class="builder-fields-grid">
             <div class="b-field-col">
               <label><i class="fa-solid fa-location-arrow"></i> Departure City / Origin</label>
-              <input type="text" id="builderOrigin" placeholder="e.g. Dhaka (DAC) or London (LHR)">
+              <input type="text" id="builderOrigin" placeholder="e.g. Hyderabad, Telangana (HYD)">
             </div>
             <div class="b-field-col">
               <label><i class="fa-solid fa-location-dot"></i> Destination</label>
-              <input type="text" id="builderDest" placeholder="e.g. Tokyo & Kyoto, Japan">
+              <input type="text" id="builderDest" placeholder="e.g. Andhra Pradesh (Tirupati, Srisailam, Vijayawada)">
             </div>
             <div class="b-field-col">
               <label><i class="fa-regular fa-calendar-days"></i> Trip Duration</label>
               <select id="builderDuration">
                 <option value="3 days">3 Days (Long Weekend)</option>
-                <option value="5 days">5 Days (Highlights Tour)</option>
-                <option value="7 days" selected>7 Days (Complete Immersion)</option>
-                <option value="10 days">10 Days (Extended Exploration)</option>
-                <option value="14 days">14 Days (Grand Voyage)</option>
+                <option value="5 days">5 Days (Key Highlights)</option>
+                <option value="7 days" selected>7 Days (Complete Circuit)</option>
+                <option value="10 days">10 Days (Grand Pilgrimage / Tour)</option>
+                <option value="14 days">14 Days (Extended Immersion)</option>
               </select>
             </div>
             <div class="b-field-col">
               <label><i class="fa-solid fa-wallet"></i> Target Budget & Currency</label>
-              <input type="text" id="builderBudget" placeholder="e.g. 2 Lakhs BDT, $2,000 USD, or €2,500">
+              <input type="text" id="builderBudget" placeholder="e.g. 40,000 INR, 2 Lakhs, or $1,500">
             </div>
             <div class="b-field-col full-span">
               <label><i class="fa-solid fa-compass"></i> Desired Travel Style & Interests</label>
               <div class="travel-style-pills">
-                <label class="style-choice-chip"><input type="checkbox" name="style" value="Scenic Nature & Lakes" checked> 🏔️ Scenic Nature</label>
-                <label class="style-choice-chip"><input type="checkbox" name="style" value="Cultural Heritage & Historic Sites" checked> ⛩️ Culture & Shrines</label>
-                <label class="style-choice-chip"><input type="checkbox" name="style" value="Local Gastronomy & Food Markets" checked> 🍣 Local Food & Ramen</label>
-                <label class="style-choice-chip"><input type="checkbox" name="style" value="Boutique Luxury Accommodations"> ✨ Boutique Stays</label>
-                <label class="style-choice-chip"><input type="checkbox" name="style" value="Relaxing Island & Coastal Escapes"> 🏖️ Coastal & Islands</label>
-                <label class="style-choice-chip"><input type="checkbox" name="style" value="Budget Friendly & Efficient Transit"> 🚅 Efficient Rail Transit</label>
+                <label class="style-choice-chip"><input type="checkbox" name="style" value="Sacred Temples & Darshans" checked> 🛕 Sacred Temples & Darshans</label>
+                <label class="style-choice-chip"><input type="checkbox" name="style" value="Scenic Nature & Lakes"> 🏔️ Scenic Nature</label>
+                <label class="style-choice-chip"><input type="checkbox" name="style" value="Cultural Heritage & Historic Sites" checked> ⛩️ Heritage & History</label>
+                <label class="style-choice-chip"><input type="checkbox" name="style" value="Authentic Local Cuisine" checked> 🍛 Authentic Local Food</label>
+                <label class="style-choice-chip"><input type="checkbox" name="style" value="Comfortable Temple Stays" checked> ✨ Clean Hotels Near Temples</label>
+                <label class="style-choice-chip"><input type="checkbox" name="style" value="AC Sleeper Bus & Rail Transit" checked> 🚅 AC Train / Bus Transit</label>
               </div>
             </div>
           </div>
@@ -247,19 +318,23 @@
             <span class="shortcut-hint">Click any trip to auto-fill</span>
           </div>
           <div class="chips-scroll-row">
-            <button class="preset-trip-chip" onclick="setPrompt('Plan a complete 7 days Japan trip from Bangladesh including flights, hotels, Tokyo-Kyoto bullet trains and sightseeing under 2 lakhs.')">
+            <!-- User's Andhra Pradesh Sacred Temples Tour from Hyderabad -->
+            <button class="preset-trip-chip" style="background:#fffbeb; border-color:#fcd34d; color:#92400e; font-weight:700;" onclick="selectMood('spiritual'); setPrompt('I am in Hyderabad and want to plan a complete 7-day spiritual temple tour across Andhra Pradesh covering Tirupati Balaji, Srisailam Mallikarjuna Jyotirlinga, Kanipakam Vinayaka, and Vijayawada Kanaka Durga. Include options for flight, train, or AC sleeper bus, clean hotels near temples, morning darshan tips, budget under 40,000 INR, and a connected route map.')">
+              🛕 Andhra Pradesh Famous Temples (Hyderabad → Tirupati, Srisailam, Vijayawada)
+            </button>
+            <button class="preset-trip-chip" onclick="selectMood('cultural'); setPrompt('Plan a complete 7 days Japan trip from Bangladesh including flights, hotels, Tokyo-Kyoto bullet trains and sightseeing under 2 lakhs.')">
               🌸 Japan Golden Route (7 Days • $1,800)
             </button>
-            <button class="preset-trip-chip" onclick="setPrompt('Plan a 6-day tropical retreat to Bali Indonesia from Singapore with luxury Ubud jungle villas, Nusa Penida beaches, and cultural temples under $1,200.')">
+            <button class="preset-trip-chip" onclick="selectMood('beach'); setPrompt('Plan a 6-day tropical retreat to Bali Indonesia from Singapore with luxury Ubud jungle villas, Nusa Penida beaches, and cultural temples under $1,200.')">
               🌴 Bali Tropical Oasis (6 Days • $1,200)
             </button>
-            <button class="preset-trip-chip" onclick="setPrompt('Plan an 8-day scenic journey through Switzerland including Swiss Alps, Matterhorn in Zermatt, scenic Glacier Express, and mountain chalets under $2,400.')">
+            <button class="preset-trip-chip" onclick="selectMood('mountain'); setPrompt('Plan an 8-day scenic journey through Switzerland including Swiss Alps, Matterhorn in Zermatt, scenic Glacier Express, and mountain chalets under $2,400.')">
               🏔️ Swiss Alps & Zermatt (8 Days • $2,400)
             </button>
-            <button class="preset-trip-chip" onclick="setPrompt('Plan a 7-day romantic getaway to the Amalfi Coast and Positano Italy with cliffside hotels, Capri boat tours, and authentic Italian dining under $2,100.')">
+            <button class="preset-trip-chip" onclick="selectMood('heritage'); setPrompt('Plan a 7-day romantic getaway to the Amalfi Coast and Positano Italy with cliffside hotels, Capri boat tours, and authentic Italian dining under $2,100.')">
               🌊 Amalfi Coast & Positano (7 Days • $2,100)
             </button>
-            <button class="preset-trip-chip" onclick="setPrompt('Plan a 5-day luxury trip to Dubai UAE with desert safari, Burj Khalifa, Marina yacht cruise, and 5-star hotel options under $1,600.')">
+            <button class="preset-trip-chip" onclick="selectMood('wellness'); setPrompt('Plan a 5-day luxury trip to Dubai UAE with desert safari, Burj Khalifa, Marina yacht cruise, and 5-star hotel options under $1,600.')">
               🐪 Dubai Skyline & Safari (5 Days • $1,600)
             </button>
           </div>
@@ -322,8 +397,11 @@
         <button class="res-tab-item active" data-tab="full" onclick="switchResultTab('full')">
           <i class="fa-solid fa-book-open"></i> Master Itinerary
         </button>
+        <button class="res-tab-item" data-tab="map" onclick="switchResultTab('map')">
+          <i class="fa-solid fa-map-location-dot"></i> Interactive Route Map
+        </button>
         <button class="res-tab-item" data-tab="flights" onclick="switchResultTab('flights')">
-          <i class="fa-solid fa-plane"></i> Flight Guidance
+          <i class="fa-solid fa-plane"></i> Flight & Transport
         </button>
         <button class="res-tab-item" data-tab="hotels" onclick="switchResultTab('hotels')">
           <i class="fa-solid fa-hotel"></i> Handpicked Stays
@@ -338,8 +416,38 @@
 
       <!-- Tab Panes -->
       <div id="pdfContent">
+        <!-- Master Tab -->
         <div id="tabContentFull" class="plan-tab-pane active">
+          <!-- Quick Inline Route Map Preview -->
+          <div id="inlineMapContainer" class="map-card-wrapper" style="margin-bottom: 24px;">
+            <div class="map-header-row">
+              <div>
+                <h3 class="map-headline"><i class="fa-solid fa-map-location-dot"></i> Connected Journey Route</h3>
+                <p class="map-subtext">Day-by-day connected stops showing departure, temple destinations, and transit paths.</p>
+              </div>
+              <div class="map-stats-pill">
+                <i class="fa-solid fa-route"></i> <span id="routeStopsCount">Connected Route</span>
+              </div>
+            </div>
+            <div id="routeMap"></div>
+            <div id="routeTimeline" class="route-timeline-container"></div>
+          </div>
+
           <div id="resultBox" class="markdown-content"></div>
+        </div>
+
+        <!-- Dedicated Route Map Tab -->
+        <div id="tabContentMap" class="plan-tab-pane hidden">
+          <div class="map-card-wrapper">
+            <div class="map-header-row">
+              <div>
+                <h3 class="map-headline"><i class="fa-solid fa-map-location-dot"></i> Detailed Itinerary Route Map</h3>
+                <p class="map-subtext">Click any numbered pin to inspect arrival timing, temples, and transit details.</p>
+              </div>
+            </div>
+            <div id="routeMapDedicated" style="height: 480px; border-radius: var(--radius-md); border: 1px solid var(--border-light); overflow: hidden;"></div>
+            <div id="routeTimelineDedicated" class="route-timeline-container"></div>
+          </div>
         </div>
 
         <div id="tabContentFlights" class="plan-tab-pane hidden">
@@ -371,16 +479,16 @@
 
         <div class="revision-quick-chips">
           <span style="font-size:0.8rem; font-weight:700; color:#92400e; margin-right:6px;">Quick tweaks:</span>
-          <button class="rev-chip" onclick="appendFeedback('Add more local street food and authentic ramen recommendations.')">+ More local food</button>
-          <button class="rev-chip" onclick="appendFeedback('Suggest upscale 4-star boutique hotel alternatives.')">+ Upscale boutique hotels</button>
-          <button class="rev-chip" onclick="appendFeedback('Prioritize budget-friendly scenic train options.')">+ Scenic train passes</button>
-          <button class="rev-chip" onclick="appendFeedback('Make day 3 and 4 more relaxed with free leisure time.')">+ Relaxed pace</button>
+          <button class="rev-chip" onclick="appendFeedback('Add early morning VIP break darshan guidance for Tirupati and Srisailam.')">+ Temple Darshan Tips</button>
+          <button class="rev-chip" onclick="appendFeedback('Include AC Volvo bus and sleeper train schedules between cities.')">+ AC Bus / Train Options</button>
+          <button class="rev-chip" onclick="appendFeedback('Suggest clean, reputable hotels strictly within 1 km of temple gates.')">+ Hotels Near Temple Gates</button>
+          <button class="rev-chip" onclick="appendFeedback('Make day 3 and 4 more relaxed with free leisure time.')">+ Relaxed Pace</button>
         </div>
 
         <textarea 
           id="approvalFeedback" 
           class="approval-feedback-textarea" 
-          placeholder="Optional: add custom modification requests (e.g., 'Substitute day 4 with a Kyoto tea ceremony, and keep total hotel costs below $800')..."
+          placeholder="Optional: add custom modification requests (e.g., 'Prefer train from Hyderabad to Tirupati, then taxi to Srisailam, keep total budget under 35,000 INR')..."
         ></textarea>
 
         <div class="approval-actions-row">
@@ -403,13 +511,37 @@
         <span class="section-tag-pill"><i class="fa-solid fa-earth-americas"></i> Curated Inspiration</span>
         <h2 class="section-headline">Inspiring Journeys Curated for You</h2>
         <p class="section-subtext">
-          Discover handpicked destinations around the world. Click any card to launch an autonomous multi-agent plan tailored to your travel style.
+          Discover handpicked destinations around India and the world. Click any card to launch an autonomous multi-agent plan tailored to your travel mood.
         </p>
       </div>
 
       <div class="destinations-grid">
         
-        <!-- Card 1: Japan -->
+        <!-- Card 1: Andhra Pradesh Temple Circuit -->
+        <div class="dest-card" style="border: 2px solid #fde68a;">
+          <div class="dest-img-wrap">
+            <img src="https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=800&q=80" alt="Ancient Indian Temple Architecture">
+            <span class="dest-duration-badge" style="background:#d97706;"><i class="fa-regular fa-clock"></i> 7 Days</span>
+            <span class="dest-budget-badge">₹40,000 Est.</span>
+          </div>
+          <div class="dest-body">
+            <div class="dest-location-title">
+              <span>Andhra Pradesh Temples</span>
+              <span style="font-size: 1.1rem;">🛕</span>
+            </div>
+            <p class="dest-blurb">
+              Tirumala Venkateswara sacred darshan, Srisailam Jyotirlinga in Nallamala hills, Kanipakam Vinayaka, and Vijayawada Kanaka Durga.
+            </p>
+            <div class="dest-footer-row">
+              <span class="dest-vibe-tag" style="color:#d97706;"><i class="fa-solid fa-om"></i> Spiritual & Sacred</span>
+              <button class="btn-plan-dest" onclick="selectMood('spiritual'); setPrompt('I am in Hyderabad and want to plan a complete 7-day spiritual temple tour across Andhra Pradesh covering Tirupati Balaji, Srisailam Mallikarjuna Jyotirlinga, Kanipakam Vinayaka, and Vijayawada Kanaka Durga. Include options for flight, train, or AC sleeper bus, clean hotels near temples, morning darshan tips, budget under 40,000 INR, and a connected route map.')">
+                <span>Plan Circuit</span> <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Japan -->
         <div class="dest-card">
           <div class="dest-img-wrap">
             <img src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=80" alt="Kyoto Pagoda and Mount Fuji Japan">
@@ -426,14 +558,14 @@
             </p>
             <div class="dest-footer-row">
               <span class="dest-vibe-tag"><i class="fa-solid fa-torii-gate"></i> Culture & Shrines</span>
-              <button class="btn-plan-dest" onclick="setPrompt('Plan a 7-day cultural journey to Tokyo and Kyoto Japan with scenic views of Mount Fuji, authentic ramen spots, and bullet train passes under $1,800.')">
+              <button class="btn-plan-dest" onclick="selectMood('cultural'); setPrompt('Plan a 7-day cultural journey to Tokyo and Kyoto Japan with scenic views of Mount Fuji, authentic ramen spots, and bullet train passes under $1,800.')">
                 <span>Plan Trip</span> <i class="fa-solid fa-arrow-right"></i>
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Card 2: Bali -->
+        <!-- Card 3: Bali -->
         <div class="dest-card">
           <div class="dest-img-wrap">
             <img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80" alt="Ubud Rice Terraces and Tropical Bali">
@@ -450,14 +582,14 @@
             </p>
             <div class="dest-footer-row">
               <span class="dest-vibe-tag"><i class="fa-solid fa-umbrella-beach"></i> Tropical & Spa</span>
-              <button class="btn-plan-dest" onclick="setPrompt('Plan a 6-day tropical retreat to Bali Indonesia with luxury Ubud jungle villas, Nusa Penida beaches, and cultural temples under $1,200.')">
+              <button class="btn-plan-dest" onclick="selectMood('beach'); setPrompt('Plan a 6-day tropical retreat to Bali Indonesia with luxury Ubud jungle villas, Nusa Penida beaches, and cultural temples under $1,200.')">
                 <span>Plan Trip</span> <i class="fa-solid fa-arrow-right"></i>
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Card 3: Swiss Alps -->
+        <!-- Card 4: Swiss Alps -->
         <div class="dest-card">
           <div class="dest-img-wrap">
             <img src="https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?auto=format&fit=crop&w=800&q=80" alt="Swiss Alps Zermatt Matterhorn">
@@ -474,14 +606,14 @@
             </p>
             <div class="dest-footer-row">
               <span class="dest-vibe-tag"><i class="fa-solid fa-mountain"></i> Alpine Escapes</span>
-              <button class="btn-plan-dest" onclick="setPrompt('Plan an 8-day scenic journey through Switzerland including Swiss Alps, Matterhorn in Zermatt, scenic Glacier Express, and mountain chalets under $2,400.')">
+              <button class="btn-plan-dest" onclick="selectMood('mountain'); setPrompt('Plan an 8-day scenic journey through Switzerland including Swiss Alps, Matterhorn in Zermatt, scenic Glacier Express, and mountain chalets under $2,400.')">
                 <span>Plan Trip</span> <i class="fa-solid fa-arrow-right"></i>
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Card 4: Amalfi Coast -->
+        <!-- Card 5: Amalfi Coast -->
         <div class="dest-card">
           <div class="dest-img-wrap">
             <img src="https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=800&q=80" alt="Amalfi Coast Positano Italy">
@@ -498,31 +630,7 @@
             </p>
             <div class="dest-footer-row">
               <span class="dest-vibe-tag"><i class="fa-solid fa-water"></i> Coastal Romance</span>
-              <button class="btn-plan-dest" onclick="setPrompt('Plan a 7-day romantic getaway to the Amalfi Coast and Positano Italy with cliffside hotels, Capri boat tours, and authentic Italian dining under $2,100.')">
-                <span>Plan Trip</span> <i class="fa-solid fa-arrow-right"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 5: Iceland -->
-        <div class="dest-card">
-          <div class="dest-img-wrap">
-            <img src="https://images.unsplash.com/photo-1504893524553-b855bce32c67?auto=format&fit=crop&w=800&q=80" alt="Iceland Waterfalls and Aurora">
-            <span class="dest-duration-badge"><i class="fa-regular fa-clock"></i> 6 Days</span>
-            <span class="dest-budget-badge">$2,250 Est.</span>
-          </div>
-          <div class="dest-body">
-            <div class="dest-location-title">
-              <span>Reykjavik & Golden Circle</span>
-              <span style="font-size: 1.1rem;">🇮🇸</span>
-            </div>
-            <p class="dest-blurb">
-              Vast volcanic landscapes, geothermal mineral lagoons, thunderous glacier waterfalls, black sand coastlines, and dancing Northern Lights.
-            </p>
-            <div class="dest-footer-row">
-              <span class="dest-vibe-tag"><i class="fa-solid fa-snowflake"></i> Nature & Wonders</span>
-              <button class="btn-plan-dest" onclick="setPrompt('Plan a 6-day adventure in Iceland covering Reykjavik, Golden Circle, Blue Lagoon, and South Coast waterfalls under $2,250.')">
+              <button class="btn-plan-dest" onclick="selectMood('heritage'); setPrompt('Plan a 7-day romantic getaway to the Amalfi Coast and Positano Italy with cliffside hotels, Capri boat tours, and authentic Italian dining under $2,100.')">
                 <span>Plan Trip</span> <i class="fa-solid fa-arrow-right"></i>
               </button>
             </div>
@@ -546,7 +654,7 @@
             </p>
             <div class="dest-footer-row">
               <span class="dest-vibe-tag"><i class="fa-solid fa-gem"></i> Modern Luxury</span>
-              <button class="btn-plan-dest" onclick="setPrompt('Plan a 5-day luxury trip to Dubai UAE with desert safari, Burj Khalifa, Marina yacht cruise, and 5-star hotel options under $1,600.')">
+              <button class="btn-plan-dest" onclick="selectMood('wellness'); setPrompt('Plan a 5-day luxury trip to Dubai UAE with desert safari, Burj Khalifa, Marina yacht cruise, and 5-star hotel options under $1,600.')">
                 <span>Plan Trip</span> <i class="fa-solid fa-arrow-right"></i>
               </button>
             </div>
@@ -573,7 +681,7 @@
         <!-- Navigation Slide Buttons -->
         <div class="fleet-nav-strip">
           <button class="fleet-nav-btn active" data-agent="flight" onclick="selectAgentSlide('flight')">
-            <i class="fa-solid fa-plane-departure"></i> SkyScout Flights
+            <i class="fa-solid fa-plane-departure"></i> SkyScout Flights & Transit
           </button>
           <button class="fleet-nav-btn" data-agent="hotel" onclick="selectAgentSlide('hotel')">
             <i class="fa-solid fa-hotel"></i> Oasis Stays
@@ -596,15 +704,15 @@
         <div id="slideFlight" class="fleet-slide-pane">
           <div class="agent-slide-grid">
             <div class="agent-slide-info">
-              <span class="agent-role-pill">Aviation & Route Intelligence</span>
-              <h3><i class="fa-solid fa-plane-departure" style="color:var(--brand-ocean);"></i> SkyScout Flight Specialist</h3>
+              <span class="agent-role-pill">Multi-Modal Transport & Aviation</span>
+              <h3><i class="fa-solid fa-plane-departure" style="color:var(--brand-ocean);"></i> SkyScout Transport Specialist</h3>
               <p>
-                Analyzes departure hubs, airline alliances, typical layover durations, and baggage allowances. Synthesizes optimal route timings so you spend less time waiting in airports and more time exploring.
+                Analyzes departure hubs, flight connections, express train routes (like Vande Bharat / Bullet trains), and interstate AC sleeper buses. Formulates realistic journey segments so you travel with complete clarity.
               </p>
               <ul class="agent-feature-list">
-                <li><i class="fa-solid fa-check-circle"></i> Departure & arrival hub mapping with connection feasibility.</li>
-                <li><i class="fa-solid fa-check-circle"></i> AviationStack MCP protocol integration for live airline data.</li>
-                <li><i class="fa-solid fa-check-circle"></i> Intelligent fallback to travel domain models when free tiers restrict access.</li>
+                <li><i class="fa-solid fa-check-circle"></i> Flight routes, durations, airline carriers, and estimated fares.</li>
+                <li><i class="fa-solid fa-check-circle"></i> Intercity rail and AC sleeper bus transit alternatives for domestic trips.</li>
+                <li><i class="fa-solid fa-check-circle"></i> Realistic door-to-door transit times and hub connections.</li>
               </ul>
             </div>
             <div class="agent-slide-tech-card">
@@ -614,11 +722,11 @@
               </div>
               <div class="tech-spec-item">
                 <span class="tech-label">Primary Tooling</span>
-                <span class="tech-value">AviationStack MCP Server</span>
+                <span class="tech-value">AviationStack MCP + Transit Engine</span>
               </div>
               <div class="tech-spec-item">
                 <span class="tech-label">Execution Model</span>
-                <span class="tech-value">LangGraph Parallel Branch</span>
+                <span class="tech-value">LangGraph Parallel Node</span>
               </div>
               <div class="tech-spec-item">
                 <span class="tech-label">Output Target</span>
@@ -626,7 +734,7 @@
               </div>
               <div class="tech-spec-item">
                 <span class="tech-label">Data Freshness</span>
-                <span class="tech-value">Real-time & Curated Knowledge</span>
+                <span class="tech-value">Multi-Modal Routing Knowledge</span>
               </div>
             </div>
           </div>
@@ -639,12 +747,12 @@
               <span class="agent-role-pill">Live Web Accommodations Curator</span>
               <h3><i class="fa-solid fa-hotel" style="color:var(--nature-emerald);"></i> Oasis Stays Specialist</h3>
               <p>
-                Conducts real-time Tavily search queries to uncover boutique hotels, luxury villas, neighborhood safety ratings, and traveler verified feedback matching your exact vibe.
+                Conducts real-time Tavily search queries to uncover boutique hotels, luxury villas, temple dharamsalas, neighborhood safety ratings, and traveler verified feedback matching your exact vibe.
               </p>
               <ul class="agent-feature-list">
                 <li><i class="fa-solid fa-check-circle"></i> Live web crawling via Tavily streamable HTTP MCP server.</li>
-                <li><i class="fa-solid fa-check-circle"></i> Curates options across Budget, Mid-tier, and Luxury boutique categories.</li>
-                <li><i class="fa-solid fa-check-circle"></i> Analyzes proximity to rail stations, landmarks, and authentic dining.</li>
+                <li><i class="fa-solid fa-check-circle"></i> Structured tables: Budget, Mid-tier, and Luxury categories with prices.</li>
+                <li><i class="fa-solid fa-check-circle"></i> Analyzes proximity to temple gates, rail stations, and attractions.</li>
               </ul>
             </div>
             <div class="agent-slide-tech-card">
@@ -657,8 +765,8 @@
                 <span class="tech-value">Tavily Search MCP (Streamable HTTP)</span>
               </div>
               <div class="tech-spec-item">
-                <span class="tech-label">Intelligence Core</span>
-                <span class="tech-value">Qwen 3.8 / GPT-OSS Reasoning</span>
+                <span class="tech-label">Post-Processing</span>
+                <span class="tech-value">LLM Structured Table Extractor</span>
               </div>
               <div class="tech-spec-item">
                 <span class="tech-label">Output Target</span>
@@ -679,12 +787,12 @@
               <span class="agent-role-pill">Dedicated FastMCP Climate Engine</span>
               <h3><i class="fa-solid fa-cloud-sun" style="color:var(--sunset-gold);"></i> Climate Intelligence Agent</h3>
               <p>
-                Connects directly to an isolated OpenWeather FastMCP server via stdio transport. Provides current climate readings, 5-day forecasts, seasonal rain probabilities, and tailor-made wardrobe packing guidance.
+                Connects directly to an isolated OpenWeather FastMCP server via stdio transport. Provides current climate readings, seasonal rain probabilities, and tailor-made wardrobe packing guidance.
               </p>
               <ul class="agent-feature-list">
                 <li><i class="fa-solid fa-check-circle"></i> Local FastMCP sub-process running OpenWeather tools.</li>
-                <li><i class="fa-solid fa-check-circle"></i> Intelligent capital and metropolitan city resolution.</li>
-                <li><i class="fa-solid fa-check-circle"></i> Practical packing essentials (rain gear, layers, footwear).</li>
+                <li><i class="fa-solid fa-check-circle"></i> Intelligent capital, state, and metropolitan city resolution.</li>
+                <li><i class="fa-solid fa-check-circle"></i> Practical packing essentials and monsoon/heat advisories.</li>
               </ul>
             </div>
             <div class="agent-slide-tech-card">
@@ -722,9 +830,9 @@
                 Breaks down multi-currency travel expenses into realistic daily allowances. Evaluates lodging, dining, transit, and attraction costs against your target budget so you avoid unpleasant financial surprises.
               </p>
               <ul class="agent-feature-list">
-                <li><i class="fa-solid fa-check-circle"></i> Multi-currency conversion (USD, EUR, GBP, BDT, JPY, AED).</li>
+                <li><i class="fa-solid fa-check-circle"></i> Multi-currency conversion (INR, USD, EUR, GBP, BDT, JPY).</li>
                 <li><i class="fa-solid fa-check-circle"></i> Feasibility scoring: Flags tight budgets with actionable trade-offs.</li>
-                <li><i class="fa-solid fa-check-circle"></i> Itemized daily food, transport, and leisure allocations.</li>
+                <li><i class="fa-solid fa-check-circle"></i> Itemized daily food, transport, and temple puja allocations.</li>
               </ul>
             </div>
             <div class="agent-slide-tech-card">
@@ -738,7 +846,7 @@
               </div>
               <div class="tech-spec-item">
                 <span class="tech-label">Currency Scope</span>
-                <span class="tech-value">Global Currencies & Local Lakhs</span>
+                <span class="tech-value">INR Lakhs, USD, EUR, Multi-Currency</span>
               </div>
               <div class="tech-spec-item">
                 <span class="tech-label">Output Target</span>
@@ -762,9 +870,9 @@
                 The orchestrator of the entire multi-agent swarm. Validates input safety and travel intent, parses core constraints, and schedules specialists dynamically.
               </p>
               <ul class="agent-feature-list">
-                <li><i class="fa-solid fa-check-circle"></i> Input Guardrail: Blocks prompt injection, out-of-scope tasks, or unsafe requests.</li>
+                <li><i class="fa-solid fa-check-circle"></i> Single-pass prompt: Fast guardrail and constraint routing.</li>
                 <li><i class="fa-solid fa-check-circle"></i> Dynamic routing: Only triggers specialists relevant to the user request.</li>
-                <li><i class="fa-solid fa-check-circle"></i> Harmonizes disparate agent outputs into a unified master blueprint.</li>
+                <li><i class="fa-solid fa-check-circle"></i> GPS Geocoding: Generates coordinates for Leaflet route mapping.</li>
               </ul>
             </div>
             <div class="agent-slide-tech-card">
@@ -781,8 +889,8 @@
                 <span class="tech-value">PostgreSQL / MemorySaver</span>
               </div>
               <div class="tech-spec-item">
-                <span class="tech-label">Guardrail Verification</span>
-                <span class="tech-value">Strict Intent Classification</span>
+                <span class="tech-label">Route Mapping</span>
+                <span class="tech-value">GeoJSON & Leaflet Coordinates</span>
               </div>
               <div class="tech-spec-item">
                 <span class="tech-label">Synthesis</span>
@@ -853,7 +961,7 @@
         <span class="section-tag-pill"><i class="fa-solid fa-route"></i> The Journey</span>
         <h2 class="section-headline">How WanderLuxe AI Works</h2>
         <p class="section-subtext">
-          Three simple steps from natural travel idea to an audited, bespoke master itinerary.
+          Three simple steps from travel mood to an interactive, connected day-by-day master blueprint.
         </p>
       </div>
 
@@ -861,11 +969,11 @@
         <div class="step-card">
           <span class="step-number">01</span>
           <div class="step-icon-wrap">
-            <i class="fa-solid fa-pencil"></i>
+            <i class="fa-solid fa-masks-theater"></i>
           </div>
-          <h3>1. Define Your Vision</h3>
+          <h3>1. Select Mood & Vision</h3>
           <p>
-            Share your travel dreams in plain language or use the structured trip builder to specify your origin, destination, duration, budget, and travel vibe.
+            Choose your persona (Temples, Mountains, Beaches, Adventure) and describe your departure and destinations.
           </p>
         </div>
 
@@ -876,7 +984,7 @@
           </div>
           <h3>2. Autonomous Swarm Execution</h3>
           <p>
-            The Supervisor validates your prompt, activates specialist agents in parallel, and fetches live flights, Tavily hotels, and FastMCP climate forecasts.
+            The Supervisor validates your prompt, activates specialist agents in parallel, and plots connected GPS map points.
           </p>
         </div>
 
@@ -887,7 +995,7 @@
           </div>
           <h3>3. Human Review & Blueprint</h3>
           <p>
-            Inspect the generated draft at the Human-in-the-Loop station. Request modifications or click approve to synthesize your final, bespoke vacation dossier.
+            Inspect the connected route map, check schedules, request modifications or approve to finalize your travel dossier.
           </p>
         </div>
       </div>
@@ -910,16 +1018,16 @@
         <!-- Inquiry Form -->
         <div class="concierge-form-card">
           <h3>Contact Our Travel Concierge</h3>
-          <p>Planning a complex group tour, destination wedding, or have technical queries? Let us know.</p>
+          <p>Planning a complex pilgrimage circuit, group tour, or have technical queries? Let us know.</p>
 
           <form onsubmit="submitInquiry(event)">
             <div class="inquiry-field-group">
               <label>Your Full Name</label>
-              <input type="text" id="contactName" placeholder="e.g. Eleanor Vance">
+              <input type="text" id="contactName" placeholder="e.g. Ramesh Sharma">
             </div>
             <div class="inquiry-field-group">
               <label>Email Address</label>
-              <input type="email" id="contactEmail" placeholder="eleanor@example.com" required>
+              <input type="email" id="contactEmail" placeholder="ramesh@example.com" required>
             </div>
             <div class="inquiry-field-group">
               <label>Your Inquiry or Custom Request</label>
@@ -936,31 +1044,31 @@
           
           <div class="faq-card-item">
             <button class="faq-question-btn" onclick="toggleFaq('faq1')">
-              <span>How is WanderLuxe AI different from standard chatbots?</span>
+              <span>How does the interactive route map work?</span>
               <i id="faq1-icon" class="fa-solid fa-chevron-down"></i>
             </button>
             <div id="faq1" class="faq-answer-pane hidden">
-              Unlike generic single-prompt LLM wrappers that hallucinate prices and fake hotel names, WanderLuxe AI runs a multi-agent LangGraph system with real MCP tools: Tavily live web search for real hotels, OpenWeather FastMCP for live microclimates, and dedicated financial models.
+              WanderLuxe AI extracts GPS coordinates for each day of your journey, plots numbered pins on an interactive Leaflet map, and connects them with an animated route line. Click any pin to see day activities and transport links!
             </div>
           </div>
 
           <div class="faq-card-item">
             <button class="faq-question-btn" onclick="toggleFaq('faq2')">
-              <span>What is the Human-in-the-Loop (HITL) step?</span>
+              <span>How does the Travel Mood Analyzer work?</span>
               <i id="faq2-icon" class="fa-solid fa-chevron-down"></i>
             </button>
             <div id="faq2" class="faq-answer-pane hidden">
-              Before synthesizing the final plan, execution pauses at a checkpoint. You can review the draft, request specific changes (e.g. "add a relaxing afternoon on Day 3"), or approve it with a single click.
+              Selecting your mood (Spiritual/Temples, Mountain Serenity, Beach, Adventure) automatically tunes all 5 agents. The flight agent checks rail/bus options, hotel agent searches properties near temple gates or serene valleys, and the itinerary agent paces darshans or treks accordingly.
             </div>
           </div>
 
           <div class="faq-card-item">
             <button class="faq-question-btn" onclick="toggleFaq('faq3')">
-              <span>Are flight and hotel bookings finalized automatically?</span>
+              <span>What is the Human-in-the-Loop (HITL) step?</span>
               <i id="faq3-icon" class="fa-solid fa-chevron-down"></i>
             </button>
             <div id="faq3" class="faq-answer-pane hidden">
-              No. WanderLuxe AI provides verified guidance, booking strategies, and direct research. No real-world transactions or payment card charges are executed without your manual booking action.
+              Before synthesizing the final plan, execution pauses at a checkpoint. You can review the draft, request specific changes (e.g. "add early morning VIP darshan on Day 2"), or approve it with a single click.
             </div>
           </div>
 
@@ -997,10 +1105,11 @@
             <span class="brand-title" style="font-size:1.2rem;">WanderLuxe <span class="brand-accent">AI</span></span>
           </div>
           <p>
-            Autonomous multi-agent travel intelligence platform powered by LangGraph, FastMCP, Groq, Tavily, and PostgreSQL state checkpointing.
+            Autonomous multi-agent travel intelligence platform powered by LangGraph, FastMCP, Groq, Tavily, Leaflet.js, and PostgreSQL state checkpointing.
           </p>
           <div class="tech-badges-row">
             <span class="tech-pill">LangGraph</span>
+            <span class="tech-pill">Leaflet.js</span>
             <span class="tech-pill">FastMCP</span>
             <span class="tech-pill">Tavily Search</span>
             <span class="tech-pill">Groq LLM</span>
@@ -1012,7 +1121,7 @@
           <h4>Platform</h4>
           <ul class="footer-links-list">
             <li><a href="#plannerSection">Trip Architect</a></li>
-            <li><a href="#destinations">Curated Destinations</a></li>
+            <li><a href="#destinations">Curated Circuits</a></li>
             <li><a href="#fleetShowcase">Agent Fleet Showcase</a></li>
             <li><a href="#howItWorks">How It Works</a></li>
           </ul>
@@ -1021,7 +1130,7 @@
         <div class="footer-links-col">
           <h4>Specialists</h4>
           <ul class="footer-links-list">
-            <li><a href="#fleetShowcase" onclick="selectAgentSlide('flight')">SkyScout Flights</a></li>
+            <li><a href="#fleetShowcase" onclick="selectAgentSlide('flight')">Transport & Flights</a></li>
             <li><a href="#fleetShowcase" onclick="selectAgentSlide('hotel')">Oasis Stays</a></li>
             <li><a href="#fleetShowcase" onclick="selectAgentSlide('weather')">Climate Intelligence</a></li>
             <li><a href="#fleetShowcase" onclick="selectAgentSlide('budget')">Cost Architect</a></li>
@@ -1033,21 +1142,22 @@
           <ul class="footer-links-list">
             <li><a href="#concierge">Contact Concierge</a></li>
             <li><a href="#concierge">Frequently Asked Questions</a></li>
-            <li><a href="https://github.com/markedjs/marked" target="_blank" rel="noopener">Markdown Engine</a></li>
+            <li><a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet Mapping Engine</a></li>
           </ul>
         </div>
       </div>
 
       <div class="footer-bottom-row">
         <span>&copy; 2026 WanderLuxe AI. Autonomous Multi-Agent Travel Intelligence.</span>
-        <span>Designed for Wanderlust & Seamless Global Travel.</span>
+        <span>Designed for Wanderlust, Spiritual Journeys & Global Travel.</span>
       </div>
     </div>
   </footer>
 
-  <!-- Scripts: Marked.js, html2pdf, and Application Engine -->
+  <!-- Scripts: Marked.js, html2pdf, Leaflet.js, and Application Engine -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="/static/script.js?v=4.0"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="/static/script.js?v=5.0"></script>
 </body>
 </html>

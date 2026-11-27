@@ -11,35 +11,25 @@ from starlette.concurrency import run_in_threadpool
 
 from backend import run_travel_agent, resume_travel_agent
 
-# This is kept from the original project to allow the existing synchronous
-# agent functions to call async MCP helpers inside FastAPI.
 import nest_asyncio
-
 nest_asyncio.apply()
 
 BASE_DIR = Path(__file__).resolve().parent
 
 app = FastAPI(
-    title="TripMate AI",
-    description=(
-        "LangGraph Multi-Agent Travel Planner with Supervisor, Guardrails, "
-        "Human-in-the-Loop, and FastAPI Frontend"
-    ),
-    version="2.0.0",
+    title="WanderLuxe AI",
+    description="Autonomous Multi-Agent Travel Intelligence with LangGraph, MCP, Guardrails & HITL",
+    version="3.0.0",
 )
 
-app.mount(
-    "/static",
-    StaticFiles(directory=str(BASE_DIR / "static")),
-    name="static",
-)
-
+app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 
 class TravelRequest(BaseModel):
     message: str
     thread_id: str | None = None
+    preferences: dict | None = None
 
 
 class ApprovalRequest(BaseModel):
@@ -50,50 +40,34 @@ class ApprovalRequest(BaseModel):
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="index.html",
-        context={},
-    )
+    return templates.TemplateResponse(request=request, name="index.html", context={})
 
 
 @app.post("/api/travel")
 async def travel_planner(request_data: TravelRequest):
     try:
         user_message = request_data.message.strip()
-
         if not user_message:
             return JSONResponse(
                 status_code=400,
-                content={
-                    "success": False,
-                    "error": "Message cannot be empty.",
-                },
+                content={"success": False, "error": "Message cannot be empty."},
             )
 
         result = await run_in_threadpool(
             run_travel_agent,
             user_input=user_message,
             thread_id=request_data.thread_id,
+            preferences=request_data.preferences,
         )
 
-        return JSONResponse(
-            content={
-                "success": True,
-                **result,
-            }
-        )
+        return JSONResponse(content={"success": True, **result})
 
     except Exception as exc:
         print("ERROR:", exc)
         traceback.print_exc()
-
         return JSONResponse(
             status_code=500,
-            content={
-                "success": False,
-                "error": str(exc),
-            },
+            content={"success": False, "error": str(exc)},
         )
 
 
@@ -103,10 +77,7 @@ async def approve_travel_plan(request_data: ApprovalRequest):
         if not request_data.approved and not request_data.feedback.strip():
             return JSONResponse(
                 status_code=400,
-                content={
-                    "success": False,
-                    "error": "Please provide revision feedback when rejecting the draft.",
-                },
+                content={"success": False, "error": "Please provide revision feedback."},
             )
 
         result = await run_in_threadpool(
@@ -116,23 +87,14 @@ async def approve_travel_plan(request_data: ApprovalRequest):
             feedback=request_data.feedback,
         )
 
-        return JSONResponse(
-            content={
-                "success": True,
-                **result,
-            }
-        )
+        return JSONResponse(content={"success": True, **result})
 
     except Exception as exc:
         print("APPROVAL ERROR:", exc)
         traceback.print_exc()
-
         return JSONResponse(
             status_code=500,
-            content={
-                "success": False,
-                "error": str(exc),
-            },
+            content={"success": False, "error": str(exc)},
         )
 
 
@@ -140,10 +102,13 @@ async def approve_travel_plan(request_data: ApprovalRequest):
 async def health_check():
     return {
         "status": "ok",
-        "message": "TripMate AI API is running",
+        "message": "WanderLuxe AI is running",
+        "version": "3.0.0",
         "features": [
             "supervisor_agent",
             "input_guardrail",
+            "preference_analyzer",
+            "route_map",
             "human_in_the_loop",
         ],
     }
@@ -155,9 +120,4 @@ async def favicon():
 
 
 if __name__ == "__main__":
-    uvicorn.run(
-        "app:app",
-        host="127.0.0.1",
-        port=8000,
-        reload=True,
-    )
+    uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)

@@ -1828,3 +1828,428 @@ textarea#userInput::placeholder {
     justify-content: center;
   }
 }
+
+
+/* ==========================================================================
+   Traveler Mood & Persona Discovery Component
+   ========================================================================== */
+.mood-analyzer-section {
+  margin-bottom: 28px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.mood-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.mood-title-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--brand-deep);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.mood-title-badge i {
+  color: var(--sunset-gold);
+  font-size: 1.1rem;
+}
+
+.mood-subtext {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.mood-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+@media (max-width: 1200px) {
+  .mood-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 640px) {
+  .mood-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.mood-card {
+  background: var(--bg-main);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 14px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.mood-card:hover {
+  background: #ffffff;
+  border-color: var(--brand-ocean);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.mood-card.active {
+  background: rgba(2, 132, 199, 0.06);
+  border-color: var(--brand-ocean);
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.18);
+}
+
+.mood-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease;
+}
+
+.mood-card:hover .mood-icon-box {
+  transform: scale(1.1);
+}
+
+.mood-card.active .mood-icon-box {
+  background: var(--brand-ocean);
+  color: #ffffff;
+}
+
+.mood-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.25;
+}
+
+.mood-badge-check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 0.75rem;
+  color: var(--brand-ocean);
+  display: none;
+}
+
+.mood-card.active .mood-badge-check {
+  display: block;
+}
+
+/* Secondary Mood Preference Selectors */
+.mood-preferences-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-light);
+}
+
+.pref-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pref-group-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.pref-tag-chip {
+  background: var(--bg-main);
+  border: 1px solid var(--border-light);
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.pref-tag-chip:hover {
+  background: #ffffff;
+  border-color: var(--brand-ocean);
+}
+
+.pref-tag-chip.active {
+  background: var(--brand-ocean);
+  color: #ffffff;
+  border-color: var(--brand-ocean);
+}
+
+/* ==========================================================================
+   Interactive Route Map Component
+   ========================================================================== */
+.map-card-wrapper {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  box-shadow: var(--shadow-sm);
+}
+
+.map-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.map-headline {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.map-headline i {
+  color: var(--brand-ocean);
+}
+
+.map-subtext {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.map-stats-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--nature-sage);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--nature-emerald);
+}
+
+#routeMap {
+  width: 100%;
+  height: 420px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+  overflow: hidden;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+/* Custom Leaflet Map Markers */
+.map-route-marker {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #0284c7;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #ffffff;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.45);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.map-route-marker:hover {
+  transform: scale(1.15);
+}
+
+.map-route-marker.origin {
+  background: #059669;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.45);
+}
+
+.map-route-marker.destination {
+  background: #f59e0b;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.45);
+}
+
+/* Route Timeline Below Map */
+.route-timeline-container {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.route-step-node {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.step-node-bubble {
+  background: var(--bg-main);
+  border: 1px solid var(--border-light);
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.step-node-bubble i {
+  color: var(--brand-ocean);
+}
+
+.step-transit-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.step-transit-arrow i {
+  color: var(--nature-emerald);
+  font-size: 0.82rem;
+}
+
+/* ==========================================================================
+   Executive PDF Print & Export Styling
+   ========================================================================== */
+#cleanPrintExportContainer {
+  box-sizing: border-box;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+#cleanPrintExportContainer * {
+  box-sizing: border-box;
+}
+
+#cleanPrintExportContainer h1 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 6px;
+  margin-top: 20px;
+  margin-bottom: 12px;
+}
+
+#cleanPrintExportContainer h2 {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0369a1;
+  margin-top: 18px;
+  margin-bottom: 10px;
+  page-break-after: avoid;
+}
+
+#cleanPrintExportContainer h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #047857;
+  margin-top: 14px;
+  margin-bottom: 8px;
+  page-break-after: avoid;
+}
+
+#cleanPrintExportContainer p {
+  margin: 0 0 10px;
+  line-height: 1.6;
+}
+
+#cleanPrintExportContainer table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0 18px;
+  page-break-inside: avoid;
+}
+
+#cleanPrintExportContainer th {
+  background: #f1f5f9;
+  color: #1e293b;
+  font-weight: 700;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  font-size: 11.5px;
+}
+
+#cleanPrintExportContainer td {
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  font-size: 11.5px;
+  color: #334155;
+}
+
+#cleanPrintExportContainer ul,
+#cleanPrintExportContainer ol {
+  margin: 6px 0 12px 22px;
+  padding: 0;
+}
+
+#cleanPrintExportContainer li {
+  margin-bottom: 4px;
+  line-height: 1.55;
+}
+
+#cleanPrintExportContainer blockquote {
+  border-left: 3px solid #0284c7;
+  background: #f8fafc;
+  padding: 8px 14px;
+  margin: 10px 0;
+  font-style: italic;
+  color: #475569;
+}
+
+#cleanPrintExportContainer hr {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 16px 0;
+}
+
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .navbar, .hero-section, .trip-input-card, .mood-analyzer-section, .curated-gallery-section, .res-tab-nav, .plan-action-bar, .hitl-approval-section, .workflow-live-section, footer {
+    display: none !important;
+  }
+}
