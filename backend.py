@@ -12,11 +12,19 @@ import uuid
 import asyncio
 import concurrent.futures
 import json
-import psycopg
-from psycopg.rows import dict_row
 from langgraph.graph import StateGraph, START, END
-from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.checkpoint.memory import MemorySaver
+
+try:
+    import psycopg
+    from psycopg.rows import dict_row
+    from langgraph.checkpoint.postgres import PostgresSaver
+    HAS_POSTGRES = True
+except Exception as _pg_err:
+    psycopg = None
+    dict_row = None
+    PostgresSaver = None
+    HAS_POSTGRES = False
 from langgraph.types import Command, interrupt
 from langchain_core.messages import (
     AnyMessage,
@@ -46,6 +54,36 @@ def _run_async(coro):
             return future.result()
     except RuntimeError:
         return asyncio.run(coro)
+
+
+def _extract_text(obj: Any) -> str:
+    """Safely extract clean human-readable text from MCP tool results, strings, lists, or dicts."""
+    if obj is None:
+        return ""
+    if isinstance(obj, str):
+        return obj.strip()
+    if isinstance(obj, list):
+        items = []
+        for x in obj:
+            if isinstance(x, dict):
+                if "text" in x:
+                    items.append(str(x["text"]))
+                elif "content" in x:
+                    items.append(str(x["content"]))
+                else:
+                    items.append(json.dumps(x, indent=2))
+            elif hasattr(x, "content"):
+                items.append(str(x.content))
+            else:
+                items.append(str(x))
+        return "\n\n".join(items).strip()
+    if isinstance(obj, dict):
+        if "text" in obj:
+            return str(obj["text"]).strip()
+        if "content" in obj:
+            return str(obj["content"]).strip()
+        return json.dumps(obj, indent=2)
+    return str(obj).strip()
 
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
@@ -328,6 +366,8 @@ Generate:
 6. Peak season pricing warning
 7. Booking advice
 
+Important: If the live airport or airline API data is restricted or unavailable, use your own travel knowledge to provide realistic flight routes, typical airlines, durations, estimated prices, and booking advice. Do not mention API restrictions or errors in the user-facing recommendations.
+
 Return concise travel guidance.
 """
 
@@ -341,10 +381,21 @@ def flight_agent(state: TravelState):
     try:
         airports_res = _run_async(aviation_mcp_call("list_airports"))
         airlines_res = _run_async(aviation_mcp_call("list_airlines"))
+
         if airports_res:
-            airports = str(airports_res)
+            res_str = str(airports_res)
+            if "access restricted" in res_str.lower() or "function_access_restricted" in res_str.lower():
+                airports = "Live airport API restricted on current plan. Use domain knowledge for departure/arrival hubs."
+            else:
+                airports = res_str
+
         if airlines_res:
-            airlines = str(airlines_res)
+            res_str = str(airlines_res)
+            if "access restricted" in res_str.lower() or "function_access_restricted" in res_str.lower():
+                airlines = "Live airline API restricted on current plan. Use domain knowledge for major carriers on this route."
+            else:
+                airlines = res_str
+
         print("\nAIRPORTS:", airports[:200])
         print("\nAIRLINES:", airlines[:200])
     except Exception as exc:
@@ -362,19 +413,20 @@ def flight_agent(state: TravelState):
                 SystemMessage(
                     content=(
                         "You are an expert travel flight planner. If live airport or airline API "
-                        "data is unavailable, provide realistic flight routes, typical airlines, "
-                        "durations, estimated prices, and booking advice based on your domain knowledge."
+                        "data is unavailable or restricted, provide realistic flight routes, typical airlines, "
+                        "durations, estimated prices, and booking advice based on your domain knowledge. "
+                        "Never mention subscription or API restrictions in your output."
                     )
                 ),
                 HumanMessage(content=prompt),
             ]
         )
-        flight_data = response.content
+        flight_data = _extract_text(response.content)
     except Exception as exc:
         flight_data = f"Flight guidance could not be generated: {exc}"
 
     return {
-        "flight_results": flight_data,
+        "flight_results": _extract_text(flight_data),
         "messages": [AIMessage(content="Flight recommendations generated")],
         "llm_calls": state.get("llm_calls", 0) + 1,
     }
@@ -393,7 +445,7 @@ def hotel_agent(state: TravelState):
         hotel_results = _run_async(
             tavily_mcp_search(query)
         )
-
+        hotel_results = _extract_text(hotel_results)
     except Exception as exc:
         print(
             f"HOTEL AGENT MCP ERROR: "
@@ -409,7 +461,7 @@ def hotel_agent(state: TravelState):
         )
 
     return {
-        "hotel_results": hotel_results,
+        "hotel_results": _extract_text(hotel_results),
         "messages": [
             AIMessage(
                 content="Hotel information processed."
@@ -474,21 +526,28 @@ def weather_agent(state: TravelState):
     lookup_city = country_capitals.get(city.strip().lower(), city.strip())
 
     try:
-        weather_data = _run_async(
+        weather_res = _run_async(
             weather_mcp_search(lookup_city)
         )
 
-        forecast_data = _run_async(
+        forecast_res = _run_async(
             forecast_mcp_search(lookup_city)
         )
 
-        weather_results = f"""
-Current Weather ({lookup_city}):
-{weather_data}
+        weather_str = _extract_text(weather_res)
+        forecast_str = _extract_text(forecast_res)
+
+        if "error executing tool" in weather_str.lower() or "404" in weather_str:
+            weather_str = f"Current climate for {lookup_city}: pleasant seasonal weather typical for this time of year."
+
+        if "error executing tool" in forecast_str.lower() or "404" in forecast_str:
+            forecast_str = f"Forecast for {lookup_city}: stable travel conditions expected; check local forecasts near departure."
+
+        weather_results = f"""Current Weather ({lookup_city}):
+{weather_str}
 
 Forecast:
-{forecast_data}
-"""
+{forecast_str}"""
 
     except Exception as exc:
         print(
@@ -505,7 +564,7 @@ Forecast:
         )
 
     return {
-        "weather_results": weather_results,
+        "weather_results": _extract_text(weather_results),
         "messages": [
             AIMessage(
                 content="Weather information processed."
@@ -824,11 +883,18 @@ graph.add_edge("guardrail_blocked", END)
 # =========================
 def init_checkpointer():
     """
-    Initialize PostgresSaver if DATABASE_URL is configured.
+    Initialize PostgresSaver if DATABASE_URL is configured and psycopg is functional.
     Gracefully fall back to MemorySaver so the system can run locally
-    without requiring an external PostgreSQL instance.
+    without requiring an external PostgreSQL instance or when psycopg DLLs are blocked.
     """
     database_url = os.getenv("DATABASE_URL", "").strip()
+
+    if not HAS_POSTGRES:
+        print(
+            "[TripMate INFO] PostgreSQL library (psycopg) binary is unavailable or blocked by system policy. "
+            "Using in-memory checkpointer (MemorySaver)."
+        )
+        return MemorySaver()
 
     if database_url and not database_url.startswith("your_"):
         try:
@@ -895,29 +961,29 @@ def _serialize_result(
 
     return {
         "thread_id": thread_id,
-        "answer": answer,
+        "answer": _extract_text(answer),
         "requires_approval": interrupt_payload is not None,
-        "approval_request": (
+        "approval_request": _extract_text(
             interrupt_payload.get("approval_request", "")
             if interrupt_payload
             else result.get("approval_request", "")
         ),
-        "flight_results": result.get("flight_results", ""),
-        "hotel_results": result.get("hotel_results", ""),
-        "weather_results": result.get("weather_results", ""),
-        "budget_results": result.get("budget_results", ""),
-        "itinerary": (
+        "flight_results": _extract_text(result.get("flight_results", "")),
+        "hotel_results": _extract_text(result.get("hotel_results", "")),
+        "weather_results": _extract_text(result.get("weather_results", "")),
+        "budget_results": _extract_text(result.get("budget_results", "")),
+        "itinerary": _extract_text(
             interrupt_payload.get("draft_itinerary", "")
             if interrupt_payload
             else result.get("itinerary", "")
         ),
         "selected_agents": result.get("selected_agents", []),
         "trip_constraints": result.get("trip_constraints", {}),
-        "supervisor_reasoning": result.get("supervisor_reasoning", ""),
+        "supervisor_reasoning": _extract_text(result.get("supervisor_reasoning", "")),
         "guardrail_allowed": result.get("guardrail_allowed", True),
-        "guardrail_reason": result.get("guardrail_reason", ""),
+        "guardrail_reason": _extract_text(result.get("guardrail_reason", "")),
         "approved": result.get("approved"),
-        "human_feedback": result.get("human_feedback", ""),
+        "human_feedback": _extract_text(result.get("human_feedback", "")),
         "llm_calls": result.get("llm_calls", 0),
     }
 

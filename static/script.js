@@ -1,99 +1,373 @@
+/**
+ * WanderLuxe AI — Autonomous Multi-Agent Travel Intelligence Platform
+ * Client Application Engine
+ */
+
 let currentThreadId = localStorage.getItem("travel_thread_id") || null;
 let latestAnswerMarkdown = "";
 let waitingForApproval = false;
+let currentDataPayload = null;
+let currentAgentSlideIndex = 0;
 
-const AGENT_LABELS = {
-  flight_agent: "✈️ Flight Agent",
-  hotel_agent: "🏨 Hotel Agent",
-  weather_agent: "🌦️ Weather Agent",
-  budget_agent: "💰 Budget Agent",
-  itinerary_agent: "🗓️ Itinerary Agent"
+const AGENT_SLIDES = [
+  "flight",
+  "hotel",
+  "weather",
+  "budget",
+  "supervisor",
+  "hitl"
+];
+
+const AGENT_META = {
+  flight_agent: {
+    name: "SkyScout Flight Agent",
+    icon: "fa-plane-departure",
+    desc: "AviationStack & Airline Routing Engine"
+  },
+  hotel_agent: {
+    name: "Oasis Stays Specialist",
+    icon: "fa-hotel",
+    desc: "Tavily Real-Time Web Discovery"
+  },
+  weather_agent: {
+    name: "Climate Intelligence Agent",
+    icon: "fa-cloud-sun",
+    desc: "FastMCP Climate & Microforecasts"
+  },
+  budget_agent: {
+    name: "Cost Architect Agent",
+    icon: "fa-coins",
+    desc: "Currency & Spending Feasibility"
+  },
+  itinerary_agent: {
+    name: "Master Blueprint Synthesizer",
+    icon: "fa-calendar-day",
+    desc: "Harmonized Day-by-Day Master Plan"
+  }
 };
 
-function setPrompt(text) {
-  document.getElementById("userInput").value = text;
+/**
+ * Robust string extractor to guarantee marked.parse never receives an array or object
+ */
+function toMarkdownString(val) {
+  if (val === null || val === undefined) return "";
+  if (typeof val === "string") return val;
+  if (Array.isArray(val)) {
+    return val
+      .map((item) => {
+        if (typeof item === "string") return item;
+        if (item && typeof item === "object") {
+          if (item.text) return item.text;
+          if (item.content) return item.content;
+          return JSON.stringify(item);
+        }
+        return String(item);
+      })
+      .join("\n\n");
+  }
+  if (typeof val === "object") {
+    if (val.text) return val.text;
+    if (val.content) return val.content;
+    return JSON.stringify(val, null, 2);
+  }
+  return String(val);
 }
 
+function renderMarkdown(element, markdown) {
+  if (!element) return;
+  const str = toMarkdownString(markdown) || "*No details available.*";
+  if (typeof marked !== "undefined" && typeof marked.parse === "function") {
+    try {
+      element.innerHTML = marked.parse(str);
+    } catch (e) {
+      console.warn("marked.parse fallback:", e);
+      element.innerText = str;
+    }
+  } else {
+    element.innerText = str;
+  }
+}
+
+// Mode switcher: Freeform Prompt vs Structured Trip Builder
+function switchInputMode(mode) {
+  const freeformArea = document.getElementById("freeformArea");
+  const builderArea = document.getElementById("builderArea");
+  const tabFreeform = document.getElementById("tabFreeform");
+  const tabBuilder = document.getElementById("tabBuilder");
+
+  if (!freeformArea || !builderArea) return;
+
+  if (mode === "builder") {
+    freeformArea.classList.add("hidden");
+    builderArea.classList.remove("hidden");
+    tabFreeform?.classList.remove("active");
+    tabBuilder?.classList.add("active");
+  } else {
+    builderArea.classList.add("hidden");
+    freeformArea.classList.remove("hidden");
+    tabBuilder?.classList.remove("active");
+    tabFreeform?.classList.add("active");
+  }
+}
+
+// Assemble prompt from Structured Journey Builder
+function assemblePromptFromBuilder() {
+  const origin = document.getElementById("builderOrigin")?.value.trim() || "my departure city";
+  const dest = document.getElementById("builderDest")?.value.trim() || "my dream destination";
+  const duration = document.getElementById("builderDuration")?.value || "7 days";
+  const budget = document.getElementById("builderBudget")?.value.trim() || "a comfortable budget";
+
+  const styles = [];
+  document.querySelectorAll("input[name='style']:checked").forEach((chk) => {
+    styles.push(chk.value);
+  });
+  const styleStr = styles.length > 0 ? ` Focusing on ${styles.join(", ")}.` : "";
+
+  const assembled = `Plan a complete ${duration} trip to ${dest} from ${origin} under ${budget}.${styleStr} Include flight routes, hotel options, daily sightseeing, and weather-aware advice.`;
+  
+  const userInput = document.getElementById("userInput");
+  if (userInput) {
+    userInput.value = assembled;
+  }
+  switchInputMode("freeform");
+  return assembled;
+}
+
+function assembleAndSend() {
+  assemblePromptFromBuilder();
+  sendMessage();
+}
+
+// Destination Cards & Preset Prompts Click Handler
+function setPrompt(text) {
+  const input = document.getElementById("userInput");
+  if (!input) return;
+  
+  switchInputMode("freeform");
+  input.value = text;
+  input.focus();
+
+  const planner = document.getElementById("plannerSection");
+  if (planner) {
+    planner.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  // Flash highlight effect on input container
+  const box = document.querySelector(".prompt-input-container");
+  if (box) {
+    box.classList.add("highlight-pulse");
+    setTimeout(() => box.classList.remove("highlight-pulse"), 1200);
+  }
+}
+
+// Quick append to Human-in-the-Loop feedback
+function appendFeedback(text) {
+  const feedbackInput = document.getElementById("approvalFeedback");
+  if (!feedbackInput) return;
+
+  if (feedbackInput.value.trim().length > 0) {
+    feedbackInput.value += ` ${text}`;
+  } else {
+    feedbackInput.value = text;
+  }
+  feedbackInput.focus();
+}
+
+// Interactive Agent Fleet Slide Showcase
+function selectAgentSlide(agentKey) {
+  const idx = AGENT_SLIDES.indexOf(agentKey);
+  if (idx !== -1) {
+    currentAgentSlideIndex = idx;
+  }
+
+  // Update nav buttons
+  document.querySelectorAll(".fleet-nav-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.agent === agentKey);
+  });
+
+  // Toggle slide detail panes
+  document.querySelectorAll(".fleet-slide-pane").forEach((pane) => {
+    pane.classList.add("hidden");
+  });
+
+  const slideMap = {
+    flight: "slideFlight",
+    hotel: "slideHotel",
+    weather: "slideWeather",
+    budget: "slideBudget",
+    supervisor: "slideSupervisor",
+    hitl: "slideHitl"
+  };
+
+  const targetId = slideMap[agentKey] || "slideFlight";
+  const targetPane = document.getElementById(targetId);
+  if (targetPane) {
+    targetPane.classList.remove("hidden");
+    targetPane.classList.add("fade-in");
+  }
+}
+
+function nextAgentSlide() {
+  currentAgentSlideIndex = (currentAgentSlideIndex + 1) % AGENT_SLIDES.length;
+  selectAgentSlide(AGENT_SLIDES[currentAgentSlideIndex]);
+}
+
+function prevAgentSlide() {
+  currentAgentSlideIndex = (currentAgentSlideIndex - 1 + AGENT_SLIDES.length) % AGENT_SLIDES.length;
+  selectAgentSlide(AGENT_SLIDES[currentAgentSlideIndex]);
+}
+
+// FAQ Accordion
+function toggleFaq(faqId) {
+  const answer = document.getElementById(faqId);
+  const icon = document.getElementById(`${faqId}-icon`);
+  if (!answer) return;
+
+  const isHidden = answer.classList.contains("hidden");
+  if (isHidden) {
+    answer.classList.remove("hidden");
+    if (icon) icon.className = "fa-solid fa-chevron-up";
+  } else {
+    answer.classList.add("hidden");
+    if (icon) icon.className = "fa-solid fa-chevron-down";
+  }
+}
+
+// Concierge Inquiry Form
+function submitInquiry(event) {
+  if (event) event.preventDefault();
+  const name = document.getElementById("contactName")?.value.trim() || "";
+  const email = document.getElementById("contactEmail")?.value.trim() || "";
+  const msg = document.getElementById("contactMessage")?.value.trim() || "";
+
+  if (!email || !msg) {
+    alert("Please provide your email address and trip inquiry message.");
+    return;
+  }
+
+  alert(`Thank you, ${name || "Traveler"}! Your custom travel inquiry has been routed to our Travel Concierge team. We will email you at ${email} within 24 hours.`);
+  
+  if (document.getElementById("contactName")) document.getElementById("contactName").value = "";
+  if (document.getElementById("contactEmail")) document.getElementById("contactEmail").value = "";
+  if (document.getElementById("contactMessage")) document.getElementById("contactMessage").value = "";
+}
+
+// Loading States
 function setLoading(isLoading, mode = "draft") {
   const sendBtn = document.getElementById("sendBtn");
+  const sendBtnBuilder = document.getElementById("sendBtnBuilder");
   const btnText = document.getElementById("btnText");
   const btnLoader = document.getElementById("btnLoader");
   const approveBtn = document.getElementById("approveBtn");
   const reviseBtn = document.getElementById("reviseBtn");
 
-  sendBtn.disabled = isLoading;
-  approveBtn.disabled = isLoading;
-  reviseBtn.disabled = isLoading;
+  if (sendBtn) sendBtn.disabled = isLoading;
+  if (sendBtnBuilder) sendBtnBuilder.disabled = isLoading;
+  if (approveBtn) approveBtn.disabled = isLoading;
+  if (reviseBtn) reviseBtn.disabled = isLoading;
 
   if (isLoading && mode === "draft") {
-    btnText.classList.add("hidden");
-    btnLoader.classList.remove("hidden");
+    btnText?.classList.add("hidden");
+    btnLoader?.classList.remove("hidden");
   } else {
-    btnText.classList.remove("hidden");
-    btnLoader.classList.add("hidden");
+    btnText?.classList.remove("hidden");
+    btnLoader?.classList.add("hidden");
   }
 }
 
 function showError(message) {
   const errorBox = document.getElementById("errorBox");
-  errorBox.textContent = message;
+  const errorMessage = document.getElementById("errorMessage");
+  if (!errorBox || !errorMessage) return;
+
+  errorMessage.textContent = message;
   errorBox.classList.remove("hidden");
   errorBox.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 function hideError() {
   const errorBox = document.getElementById("errorBox");
-  errorBox.classList.add("hidden");
-  errorBox.textContent = "";
+  if (errorBox) errorBox.classList.add("hidden");
 }
 
-function renderMarkdown(element, markdown) {
-  if (typeof marked !== "undefined") {
-    element.innerHTML = marked.parse(markdown || "");
-  } else {
-    element.innerText = markdown || "";
-  }
-}
-
+// Workflow Visualizer
 function showWorkflow(data) {
   const section = document.getElementById("workflowSection");
   const reasoning = document.getElementById("supervisorReasoning");
   const chips = document.getElementById("agentChips");
   const guardrailBadge = document.getElementById("guardrailBadge");
 
-  reasoning.textContent = data.supervisor_reasoning || "Supervisor routing completed.";
-  chips.innerHTML = "";
+  if (!section) return;
 
-  (data.selected_agents || []).forEach((agent) => {
-    const chip = document.createElement("span");
-    chip.className = "agent-chip";
-    chip.textContent = AGENT_LABELS[agent] || agent;
-    chips.appendChild(chip);
-  });
+  if (reasoning) {
+    reasoning.textContent = data.supervisor_reasoning || "Supervisor analyzed trip constraints, validated feasibility, and orchestrated specialist execution.";
+  }
 
-  if (data.guardrail_allowed === false) {
-    guardrailBadge.textContent = "Guardrail blocked";
-    guardrailBadge.classList.add("blocked");
-  } else {
-    guardrailBadge.textContent = "Guardrail passed";
-    guardrailBadge.classList.remove("blocked");
+  if (chips) {
+    chips.innerHTML = "";
+    (data.selected_agents || []).forEach((agentKey) => {
+      const meta = AGENT_META[agentKey] || { name: agentKey, icon: "fa-robot", desc: "Specialist" };
+      const chip = document.createElement("div");
+      chip.className = "active-agent-badge";
+      chip.innerHTML = `
+        <i class="fa-solid ${meta.icon}"></i>
+        <span>${meta.name}</span>
+      `;
+      chips.appendChild(chip);
+    });
+  }
+
+  if (guardrailBadge) {
+    if (data.guardrail_allowed === false) {
+      guardrailBadge.innerHTML = `<i class="fa-solid fa-shield-xmark"></i> Guardrail Blocked`;
+      guardrailBadge.className = "guardrail-chip blocked";
+    } else {
+      guardrailBadge.innerHTML = `<i class="fa-solid fa-shield-check"></i> Safety Guardrail Passed`;
+      guardrailBadge.className = "guardrail-chip passed";
+    }
   }
 
   section.classList.remove("hidden");
 }
 
-function showResult(answer, threadId, isDraft = false) {
-  latestAnswerMarkdown = answer || "";
+// Result Renderer with Tabs
+function showResult(data, isDraft = false) {
+  currentDataPayload = data;
+  const answer = (isDraft ? data.itinerary : data.answer) || data.answer || "";
+  latestAnswerMarkdown = answer;
 
   const resultSection = document.getElementById("resultSection");
   const resultBox = document.getElementById("resultBox");
+  const flightsBox = document.getElementById("flightsBox");
+  const hotelsBox = document.getElementById("hotelsBox");
+  const weatherBox = document.getElementById("weatherBox");
+  const budgetBox = document.getElementById("budgetBox");
   const threadInfo = document.getElementById("threadInfo");
   const resultTitle = document.getElementById("resultTitle");
 
-  renderMarkdown(resultBox, latestAnswerMarkdown);
-  threadInfo.textContent = `Thread ID: ${threadId}`;
-  resultTitle.textContent = isDraft ? "Draft Travel Plan" : "Your Final AI Travel Plan";
+  if (!resultSection) return;
+
+  // Render Full Plan
+  renderMarkdown(resultBox, answer);
+
+  // Render Specialist Tabs
+  renderMarkdown(flightsBox, data.flight_results || "### Flight Information\n*Flight guidance has been generated and integrated into the master blueprint.*");
+  renderMarkdown(hotelsBox, data.hotel_results || "### Hotel Suggestions\n*Accommodation options are curated in the master blueprint.*");
+  renderMarkdown(weatherBox, data.weather_results || "### Climate Forecast\n*Weather analysis and packing tips are integrated in the master blueprint.*");
+  renderMarkdown(budgetBox, data.budget_results || "### Budget Assessment\n*Cost breakdown and feasibility details are integrated in the master blueprint.*");
+
+  if (threadInfo) {
+    threadInfo.textContent = `Session: ${data.thread_id}`;
+  }
+
+  if (resultTitle) {
+    resultTitle.innerHTML = isDraft
+      ? `<i class="fa-regular fa-clock" style="color: #0284c7;"></i> Draft Itinerary Awaiting Approval`
+      : `<i class="fa-solid fa-crown" style="color: #f59e0b;"></i> Curated Bespoke Travel Blueprint`;
+  }
+
   resultSection.classList.remove("hidden");
+  switchResultTab("full");
 
   resultSection.scrollIntoView({
     behavior: "smooth",
@@ -101,34 +375,85 @@ function showResult(answer, threadId, isDraft = false) {
   });
 }
 
+function switchResultTab(tabName) {
+  document.querySelectorAll(".res-tab-item").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.tab === tabName);
+  });
+
+  document.querySelectorAll(".plan-tab-pane").forEach((pane) => {
+    pane.classList.remove("active");
+    pane.classList.add("hidden");
+  });
+
+  const tabIndexMap = {
+    full: "tabContentFull",
+    flights: "tabContentFlights",
+    hotels: "tabContentHotels",
+    weather: "tabContentWeather",
+    budget: "tabContentBudget"
+  };
+
+  const targetPaneId = tabIndexMap[tabName] || "tabContentFull";
+  const targetPane = document.getElementById(targetPaneId);
+  if (targetPane) {
+    targetPane.classList.remove("hidden");
+    targetPane.classList.add("active");
+  }
+}
+
 function showApproval(data) {
   waitingForApproval = true;
   const section = document.getElementById("approvalSection");
   const approvalRequest = document.getElementById("approvalRequest");
-  approvalRequest.textContent = data.approval_request ||
-    "Approve the draft or provide feedback before the final plan is generated.";
+
+  if (!section) return;
+
+  if (approvalRequest) {
+    approvalRequest.textContent =
+      data.approval_request ||
+      "Please review this draft itinerary. You have complete control: approve to synthesize the finalized blueprint, or request specific modifications.";
+  }
   section.classList.remove("hidden");
 }
 
 function hideApproval() {
   waitingForApproval = false;
-  document.getElementById("approvalSection").classList.add("hidden");
-  document.getElementById("approvalFeedback").value = "";
+  const section = document.getElementById("approvalSection");
+  if (section) section.classList.add("hidden");
+  const feedbackInput = document.getElementById("approvalFeedback");
+  if (feedbackInput) feedbackInput.value = "";
 }
 
+function resetPlanner() {
+  currentThreadId = null;
+  localStorage.removeItem("travel_thread_id");
+  hideApproval();
+
+  const userInput = document.getElementById("userInput");
+  if (userInput) userInput.value = "";
+
+  document.getElementById("resultSection")?.classList.add("hidden");
+  document.getElementById("workflowSection")?.classList.add("hidden");
+  hideError();
+
+  document.getElementById("plannerSection")?.scrollIntoView({ behavior: "smooth" });
+}
+
+// Send Message (POST /api/travel)
 async function sendMessage() {
   hideError();
 
   if (waitingForApproval) {
-    showError("Please approve or revise the current draft before starting another plan.");
+    showError("Please approve or revise the current draft before starting a new journey.");
     return;
   }
 
   const input = document.getElementById("userInput");
-  const message = input.value.trim();
+  const message = input ? input.value.trim() : "";
 
   if (!message) {
-    showError("Please enter your travel request first.");
+    showError("Please describe your travel vision or select a destination inspiration card.");
+    if (input) input.focus();
     return;
   }
 
@@ -149,7 +474,7 @@ async function sendMessage() {
     const data = await response.json();
 
     if (!response.ok || !data.success) {
-      throw new Error(data.error || "Something went wrong.");
+      throw new Error(data.error || "Failed to orchestrate travel agents.");
     }
 
     currentThreadId = data.thread_id;
@@ -158,11 +483,11 @@ async function sendMessage() {
     showWorkflow(data);
 
     if (data.requires_approval) {
-      showResult(data.itinerary || data.answer, data.thread_id, true);
+      showResult(data, true);
       showApproval(data);
     } else {
       hideApproval();
-      showResult(data.answer, data.thread_id, false);
+      showResult(data, false);
     }
   } catch (error) {
     showError(error.message);
@@ -171,20 +496,21 @@ async function sendMessage() {
   }
 }
 
+// Submit Human Approval (POST /api/travel/approve)
 async function submitApproval(approved) {
   hideError();
 
   if (!currentThreadId || !waitingForApproval) {
-    showError("There is no draft waiting for approval.");
+    showError("There is no active draft awaiting approval.");
     return;
   }
 
   const feedbackInput = document.getElementById("approvalFeedback");
-  const feedback = feedbackInput.value.trim();
+  const feedback = feedbackInput ? feedbackInput.value.trim() : "";
 
   if (!approved && !feedback) {
-    showError("Please enter revision feedback before requesting changes.");
-    feedbackInput.focus();
+    showError("Please enter your revision instructions before requesting changes.");
+    if (feedbackInput) feedbackInput.focus();
     return;
   }
 
@@ -206,12 +532,12 @@ async function submitApproval(approved) {
     const data = await response.json();
 
     if (!response.ok || !data.success) {
-      throw new Error(data.error || "Could not resume the travel workflow.");
+      throw new Error(data.error || "Could not resume the LangGraph approval workflow.");
     }
 
     showWorkflow(data);
     hideApproval();
-    showResult(data.answer, data.thread_id, false);
+    showResult(data, false);
   } catch (error) {
     showError(error.message);
   } finally {
@@ -219,29 +545,30 @@ async function submitApproval(approved) {
   }
 }
 
+// Clipboard Copy
 function copyResult() {
   const resultBox = document.getElementById("resultBox");
-  const text = resultBox.innerText;
+  const text = resultBox ? resultBox.innerText : "";
 
-  if (!text) {
-    return;
-  }
+  if (!text) return;
 
-  navigator.clipboard.writeText(text)
+  navigator.clipboard.writeText(latestAnswerMarkdown || text)
     .then(() => {
-      const copyBtn = document.querySelector(".copy-btn");
-      const oldText = copyBtn.textContent;
-      copyBtn.textContent = "Copied!";
-
-      setTimeout(() => {
-        copyBtn.textContent = oldText;
-      }, 1400);
+      const copyBtn = document.getElementById("copyBtn");
+      if (copyBtn) {
+        const oldHtml = copyBtn.innerHTML;
+        copyBtn.innerHTML = `<i class="fa-solid fa-check"></i> Copied!`;
+        setTimeout(() => {
+          copyBtn.innerHTML = oldHtml;
+        }, 1800);
+      }
     })
     .catch(() => {
-      showError("Could not copy result.");
+      showError("Could not copy itinerary to clipboard.");
     });
 }
 
+// PDF Export
 function downloadPDF() {
   const pdfContent = document.getElementById("pdfContent");
 
@@ -250,48 +577,50 @@ function downloadPDF() {
     return;
   }
 
-  const downloadBtn = document.querySelector(".download-btn");
-  const oldText = downloadBtn.textContent;
-  downloadBtn.textContent = "Preparing PDF...";
-  downloadBtn.disabled = true;
+  const downloadBtn = document.getElementById("pdfBtn");
+  const oldHtml = downloadBtn ? downloadBtn.innerHTML : "";
+  if (downloadBtn) {
+    downloadBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Generating PDF...`;
+    downloadBtn.disabled = true;
+  }
 
-  const options = {
-    margin: 0.5,
-    filename: "ai-travel-plan.pdf",
-    image: {
-      type: "jpeg",
-      quality: 0.98
-    },
-    html2canvas: {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: "#ffffff"
-    },
-    jsPDF: {
-      unit: "in",
-      format: "a4",
-      orientation: "portrait"
-    },
-    pagebreak: {
-      mode: ["avoid-all", "css", "legacy"]
+  if (typeof html2pdf !== "undefined") {
+    const options = {
+      margin: [0.5, 0.5, 0.5, 0.5],
+      filename: `WanderLuxe-Itinerary-${new Date().toISOString().slice(0, 10)}.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+      pagebreak: { mode: ["avoid-all", "css", "legacy"] }
+    };
+
+    html2pdf()
+      .set(options)
+      .from(pdfContent)
+      .save()
+      .then(() => {
+        if (downloadBtn) {
+          downloadBtn.innerHTML = oldHtml;
+          downloadBtn.disabled = false;
+        }
+      })
+      .catch(() => {
+        if (downloadBtn) {
+          downloadBtn.innerHTML = oldHtml;
+          downloadBtn.disabled = false;
+        }
+        showError("Could not generate PDF.");
+      });
+  } else {
+    window.print();
+    if (downloadBtn) {
+      downloadBtn.innerHTML = oldHtml;
+      downloadBtn.disabled = false;
     }
-  };
-
-  html2pdf()
-    .set(options)
-    .from(pdfContent)
-    .save()
-    .then(() => {
-      downloadBtn.textContent = oldText;
-      downloadBtn.disabled = false;
-    })
-    .catch(() => {
-      downloadBtn.textContent = oldText;
-      downloadBtn.disabled = false;
-      showError("Could not download PDF.");
-    });
+  }
 }
 
+// Keyboard shortcuts
 document.addEventListener("keydown", function(event) {
   if (event.ctrlKey && event.key === "Enter") {
     sendMessage();
